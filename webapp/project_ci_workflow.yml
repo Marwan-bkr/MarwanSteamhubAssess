@@ -1,0 +1,53 @@
+name: Project Node.js + Redis CI
+
+on:
+  push:
+    branches: [ main, master, project_dev_marwan ]
+  pull_request:
+    branches: [ main, master, project_dev_marwan ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: 'project/code/webapp'
+    
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: 'project/code/webapp/package-lock.json'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run build
+      run: npm run build --if-present
+    
+    - name: Run tests
+      run: npm test
+      env:
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379

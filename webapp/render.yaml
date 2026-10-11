@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: devops-project
+    runtime: node
+    repo: https://github.com/Marwan-bkr/devopsLabs.git
+    region: frankfurt
+    branch: main
+    rootDir: "project/code/webapp"
+    buildCommand: "npm install"
+    startCommand: "npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REDIS_URL
+        value: redis://red-d628b7onputs739htssg:6379
